@@ -1,365 +1,175 @@
 /**
- * Page Builder Pro - Main Application Entry Point
- * A comprehensive drag-and-drop website builder with header, footer, and template management
+ * App.js - Local Development Entry Point
+ * This file provides a simple way to run the WebElements page builder locally
  * 
- * @version 1.0.0
- * @author Page Builder Team
- * @description Professional drag and drop website builder built with Next.js, TypeScript, and Tailwind CSS
+ * Usage:
+ * 1. Make sure you have Node.js installed
+ * 2. Install dependencies: npm install
+ * 3. Run the development server: npm run dev
+ * 4. Open http://localhost:3000 in your browser
+ * 
+ * For production build:
+ * 1. Build the project: npm run build
+ * 2. Start the production server: npm start
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { Toaster } from '@/components/ui/toaster';
-import { AppNavigation } from '@/components/app-navigation';
+// Import required modules
+const express = require('express');
+const next = require('next');
+const path = require('path');
 
-// Import Page Components
-import PageBuilder from './src/app/page';
-import TemplatesPage from './src/app/templates/page';
-import PreviewPage from './src/app/preview/page';
-import HowToPage from './src/app/how-to/page';
-import SettingsPage from './src/app/settings/page';
-import WebSocketExample from './examples/websocket/page';
+// Environment configuration
+const dev = process.env.NODE_ENV !== 'production';
+const port = process.env.PORT || 3000;
+const hostname = '0.0.0.0';
 
-// Import UI Components
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+// Create Next.js app
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
 
-// Import Icons
-import { 
-  Layout, 
-  Settings, 
-  FileText, 
-  Eye, 
-  HelpCircle, 
-  Palette,
-  Smartphone,
-  Tablet,
-  Monitor,
-  Zap,
-  Shield,
-  Star
-} from 'lucide-react';
-
-/**
- * Main Application Component
- * Handles routing, theme management, and overall app structure
- */
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentRoute, setCurrentRoute] = useState('/');
-
-  // Simulate app initialization
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Handle route changes
-  const handleRouteChange = useCallback((path) => {
-    setCurrentRoute(path);
-    window.scrollTo(0, 0);
-  }, []);
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Page Builder Pro</h2>
-          <p className="text-muted-foreground">Loading your creative workspace...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <Router>
-        <div className="min-h-screen bg-background text-foreground">
-          {/* App Navigation */}
-          <AppNavigation currentRoute={currentRoute} onRouteChange={handleRouteChange} />
-          
-          {/* Main Content Area */}
-          <main className="container mx-auto px-4 py-6">
-            <Routes>
-              {/* Main Page Builder */}
-              <Route path="/" element={<PageBuilder onRouteChange={handleRouteChange} />} />
-              
-              {/* Templates Management */}
-              <Route path="/templates" element={<TemplatesPage onRouteChange={handleRouteChange} />} />
-              
-              {/* Preview Page */}
-              <Route path="/preview" element={<PreviewPage onRouteChange={handleRouteChange} />} />
-              
-              {/* How To Guide */}
-              <Route path="/how-to" element={<HowToPage onRouteChange={handleRouteChange} />} />
-              
-              {/* Settings */}
-              <Route path="/settings" element={<SettingsPage onRouteChange={handleRouteChange} />} />
-              
-              {/* WebSocket Example */}
-              <Route path="/examples/websocket" element={<WebSocketExample onRouteChange={handleRouteChange} />} />
-              
-              {/* Fallback to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-
-          {/* Global Toast Notifications */}
-          <Toaster />
-        </div>
-      </Router>
-    </NextThemesProvider>
-  );
-}
-
-/**
- * Landing Page Component
- * Welcome screen for new users
- */
-function LandingPage({ onRouteChange }) {
-  const features = [
-    {
-      icon: <Layout className="w-8 h-8" />,
-      title: "Drag & Drop Builder",
-      description: "Intuitive drag-and-drop interface for building websites without coding"
-    },
-    {
-      icon: <Palette className="w-8 h-8" />,
-      title: "50+ Widgets",
-      description: "Comprehensive widget library including sliders, carousels, forms, and more"
-    },
-    {
-      icon: <Smartphone className="w-8 h-8" />,
-      title: "Responsive Design",
-      description: "Build once, deploy everywhere with built-in responsive controls"
-    },
-    {
-      icon: <FileText className="w-8 h-8" />,
-      title: "Template System",
-      description: "Save, load, and manage templates for efficient workflow"
-    },
-    {
-      icon: <Eye className="w-8 h-8" />,
-      title: "Live Preview",
-      description: "Real-time preview of your website as you build it"
-    },
-    {
-      icon: <Settings className="w-8 h-8" />,
-      title: "Advanced Settings",
-      description: "Fine-tune every aspect of your website with advanced controls"
+// Local development utilities
+const localUtils = {
+  /**
+   * Start the development server
+   */
+  startDevServer: async () => {
+    try {
+      await app.prepare();
+      const server = express();
+      
+      // Serve static files
+      server.use(express.static(path.join(__dirname, 'public')));
+      
+      // Handle all requests with Next.js
+      server.all('*', (req, res) => {
+        return handle(req, res);
+      });
+      
+      server.listen(port, (err) => {
+        if (err) throw err;
+        console.log(`🚀 WebElements running at http://localhost:${port}`);
+        console.log(`📝 Editor available at http://localhost:${port}`);
+        console.log(`👀 Preview available at http://localhost:${port}/preview`);
+        console.log('\n💡 Tips:');
+        console.log('   - Click "Add Section" to add new sections');
+        console.log('   - Drag and drop widgets from the left panel');
+        console.log('   - Use the preview button to see your page in a new tab');
+        console.log('   - Press Ctrl+S to save your work');
+        console.log('   - Press Ctrl+Z/Ctrl+Y to undo/redo');
+      });
+    } catch (error) {
+      console.error('Error starting server:', error);
+      process.exit(1);
     }
-  ];
+  },
 
-  return (
-    <div className="max-w-7xl mx-auto">
-      {/* Hero Section */}
-      <div className="text-center py-16">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
-            <Layout className="w-8 h-8 text-primary-foreground" />
-          </div>
-        </div>
-        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          Page Builder Pro
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Professional drag-and-drop website builder with 50+ widgets, template management, and responsive design controls
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Button 
-            size="lg" 
-            onClick={() => onRouteChange('/')}
-            className="px-8"
-          >
-            <Zap className="w-4 h-4 mr-2" />
-            Start Building
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={() => onRouteChange('/how-to')}
-            className="px-8"
-          >
-            <HelpCircle className="w-4 h-4 mr-2" />
-            Learn How
-          </Button>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-        {features.map((feature, index) => (
-          <Card key={index} className="text-center p-6">
-            <CardHeader className="pb-4">
-              <div className="flex justify-center mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                  {feature.icon}
-                </div>
-              </div>
-              <CardTitle className="text-lg">{feature.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Stats Section */}
-      <div className="bg-muted/50 rounded-lg p-8 mb-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">50+</div>
-            <div className="text-muted-foreground">Widgets</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">100%</div>
-            <div className="text-muted-foreground">Responsive</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">∞</div>
-            <div className="text-muted-foreground">Templates</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">0</div>
-            <div className="text-muted-foreground">Code Required</div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="text-center py-16">
-        <h2 className="text-3xl font-bold mb-4">Ready to Build Amazing Websites?</h2>
-        <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Join thousands of users who are already creating stunning websites with Page Builder Pro
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Button 
-            size="lg" 
-            onClick={() => onRouteChange('/')}
-            className="px-8"
-          >
-            Get Started Free
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={() => onRouteChange('/templates')}
-            className="px-8"
-          >
-            Browse Templates
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Error Boundary Component
- * Catches and displays errors gracefully
- */
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('App Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6 text-destructive" />
-              </div>
-              <CardTitle>Oops! Something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-muted-foreground mb-4">
-                We encountered an unexpected error. Please try refreshing the page.
-              </p>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="w-full"
-              >
-                Refresh Page
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      );
+  /**
+   * Build the project for production
+   */
+  buildProject: async () => {
+    try {
+      console.log('🔨 Building project for production...');
+      await app.prepare();
+      console.log('✅ Build completed successfully');
+      console.log('🚀 Run "npm start" to start the production server');
+    } catch (error) {
+      console.error('Build failed:', error);
+      process.exit(1);
     }
+  },
 
-    return this.props.children;
+  /**
+   * Start production server
+   */
+  startProdServer: async () => {
+    try {
+      await app.prepare();
+      const server = express();
+      
+      // Serve static files
+      server.use(express.static(path.join(__dirname, 'public')));
+      server.use(express.static(path.join(__dirname, '.next')));
+      
+      // Handle all requests with Next.js
+      server.all('*', (req, res) => {
+        return handle(req, res);
+      });
+      
+      server.listen(port, (err) => {
+        if (err) throw err;
+        console.log(`🚀 Production WebElements server running at http://localhost:${port}`);
+      });
+    } catch (error) {
+      console.error('Error starting production server:', error);
+      process.exit(1);
+    }
   }
-}
-
-/**
- * Export wrapped App with error boundary
- */
-export default function AppWrapper() {
-  return (
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  );
-}
-
-// Export individual components for modular usage
-export { App, LandingPage, ErrorBoundary };
-
-// App metadata and configuration
-export const appConfig = {
-  name: "Page Builder Pro",
-  version: "1.0.0",
-  description: "Professional drag and drop website builder",
-  author: "Page Builder Team",
-  features: [
-    "Drag & Drop Interface",
-    "50+ Widgets",
-    "Template Management",
-    "Responsive Design",
-    "Live Preview",
-    "Header/Footer Builder",
-    "Menu Management",
-    "Theme Support"
-  ],
-  routes: [
-    { path: "/", component: "PageBuilder", name: "Page Builder" },
-    { path: "/templates", component: "TemplatesPage", name: "Templates" },
-    { path: "/preview", component: "PreviewPage", name: "Preview" },
-    { path: "/how-to", component: "HowToPage", name: "How To Guide" },
-    { path: "/settings", component: "SettingsPage", name: "Settings" },
-    { path: "/examples/websocket", component: "WebSocketExample", name: "WebSocket Example" }
-  ],
-  widgets: [
-    "Layout Widgets",
-    "Content Widgets", 
-    "Media Widgets",
-    "Advanced Widgets",
-    "TwentyTwenty Slider",
-    "Before/After Carousel"
-  ]
 };
+
+// Export utilities for external use
+module.exports = localUtils;
+
+// If this file is run directly, start the appropriate server
+if (require.main === module) {
+  if (dev) {
+    localUtils.startDevServer();
+  } else {
+    localUtils.startProdServer();
+  }
+}
+
+// Development scripts for package.json
+/*
+Add these scripts to your package.json:
+
+{
+  "scripts": {
+    "dev": "node App.js",
+    "build": "NODE_ENV=production node App.js --build",
+    "start": "NODE_ENV=production node App.js",
+    "lint": "next lint"
+  }
+}
+*/
+
+// Quick start guide
+/*
+Quick Start Guide:
+
+1. Installation:
+   npm install
+
+2. Development:
+   npm run dev
+   # Open http://localhost:3000
+
+3. Building for Production:
+   npm run build
+   npm start
+
+4. Features:
+   - Drag and drop page builder
+   - Real-time preview
+   - Responsive design
+   - Widget library
+   - Theme customization
+   - Export/Import functionality
+
+5. Keyboard Shortcuts:
+   - Ctrl+S: Save
+   - Ctrl+Z: Undo
+   - Ctrl+Y: Redo
+   - Ctrl+E: Search
+
+6. File Structure:
+   src/
+   ├── app/
+   │   ├── page.tsx          # Main page builder
+   │   ├── preview/          # Preview page
+   │   └── layout.tsx        # App layout
+   ├── components/
+   │   ├── page-builder/     # Page builder components
+   │   ├── ui/               # UI components
+   │   └── widgets/          # Widget components
+   └── lib/                  # Utility libraries
+*/

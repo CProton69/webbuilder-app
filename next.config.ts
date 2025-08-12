@@ -20,14 +20,6 @@ const nextConfig: NextConfig = {
     // 构建时忽略ESLint错误
     ignoreDuringBuilds: true,
   },
-  // Enable static export support
-  output: 'standalone',
-  // Optional: Add trailing slash for better static compatibility
-  trailingSlash: true,
-  // Optional: Disable server-side features for static export
-  images: {
-    unoptimized: true,
-  },
 };
 
 export default nextConfig;
